@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Demo de ferretería en línea: pide, elige la hora y retira sin fila en Coyhaique.">
+<meta name="robots" content="noindex">
+<style>img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Ferretería · Coyhaique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap">
+<style>
+/* Catálogo denso sobre gris, azul de marca, rojo solo para ofertas. */
+:root{
+  --page:#f5f5f5; --card:#ffffff; --ink:#333333; --ink-2:#585858; --mute:#888888; --line:#e0e0e0;
+  --blue:#0072ce; --blue-dk:#005ba6; --blue-ink:#1980cc; --sky:#e4f1fb; --slate:#343e49; --slate-2:#495867;
+  --red:#dd0021; --green:#2e7d32; --green-bg:#e8f3e9; --yellow:#ffd100;
+  --ui:"Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --max:1280px; --gut:clamp(16px,3vw,40px);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:clip}
+body{background:var(--page);color:var(--ink);font:400 16px/1.5 var(--ui);margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+h1,h2,h3,h4{margin:0;line-height:1.2;text-wrap:balance}
+.wrap{max-width:var(--max);margin-inline:auto;padding-inline:var(--gut)}
+.mute{color:var(--mute)}
+
+/* botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 22px;border-radius:4px;border:0;font-weight:700;text-decoration:none;white-space:nowrap;transition:background .12s,transform .12s}
+.btn:active{transform:scale(.98)}
+.btn.blue{background:var(--blue);color:#fff}
+.btn.blue:hover{background:var(--blue-dk)}
+.btn.line{background:#fff;color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.btn.line:hover{background:var(--sky)}
+.btn.white{background:#fff;color:var(--ink)}
+.btn.white:hover{background:var(--sky)}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.icon-btn{background:none;border:0;padding:6px;display:grid;place-items:center;position:relative}
+.icon-btn svg{width:28px;height:28px}
+
+/* franja + header */
+.franja{background:var(--slate);color:#dfe5eb;font-size:13px}
+.franja .wrap{display:flex;justify-content:space-between;gap:16px;min-height:34px;align-items:center}
+.franja b{color:#fff}
+.franja .demo{color:#aab6c2}
+@media (max-width:720px){.franja .demo{display:none}.franja .wrap{justify-content:center}}
+header.top{background:var(--card);position:sticky;top:0;z-index:30;box-shadow:0 1px 0 var(--line)}
+.top .wrap{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:20px;min-height:72px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo .mk{width:38px;height:38px;border-radius:4px;background:var(--blue);display:grid;place-items:center}
+.logo .mk svg{width:24px;height:24px}
+.logo b{display:block;font-weight:900;font-size:19px;line-height:1;text-transform:uppercase}
+.logo small{display:block;font-size:12px;color:var(--ink-2);margin-top:3px}
+.search{display:flex;height:46px;border:1px solid var(--slate);border-radius:4px;overflow:hidden;background:#fff;max-width:640px;width:100%}
+.search input{flex:1;min-width:0;border:0;padding:0 14px;font:inherit;outline:none;background:transparent}
+.search button{width:52px;border:0;background:var(--slate);color:#fff;display:grid;place-items:center}
+.search button:hover{background:var(--slate-2)}
+.search svg{width:22px;height:22px}
+.top .right{display:flex;align-items:center;gap:6px}
+.store{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.2;color:var(--ink-2);padding-right:10px;margin-right:4px;border-right:1px solid var(--line)}
+.store b{display:block;color:var(--ink);font-size:14px}
+.store svg{width:22px;height:22px;flex:0 0 auto}
+.count{position:absolute;top:0;right:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;line-height:1}
+.count:empty{display:none}
+@media (max-width:860px){
+  .top .wrap{grid-template-columns:auto 1fr auto;gap:8px 12px;padding-block:10px}
+  .top .search{grid-column:1/-1;grid-row:2;max-width:none}
+  .top .right{grid-column:3;grid-row:1;justify-self:end}
+  .store{display:none}
+}
+
+/* píldoras de categoría */
+.cats-bar{background:var(--card);border-bottom:1px solid var(--line)}
+.cats-bar .wrap{display:flex;gap:18px;overflow-x:auto;scrollbar-width:none;padding-block:12px}
+.cats-bar .wrap::-webkit-scrollbar{display:none}
+.chip{display:flex;align-items:center;gap:8px;text-decoration:none;flex:0 0 auto}
+.chip i{width:36px;height:36px;border-radius:50%;background:var(--sky);display:grid;place-items:center;color:var(--blue)}
+.chip i svg{width:20px;height:20px}
+.chip span{background:var(--sky);color:var(--blue);font-weight:700;font-size:14px;text-transform:uppercase;padding:7px 18px;border-radius:32px}
+.chip:hover span,.chip[aria-current="page"] span{background:var(--blue);color:#fff}
+
+/* hero (carrusel) */
+.campaign{position:relative;overflow:hidden;background:var(--card)}
+.track{display:flex}
+.tile{flex:0 0 100%;position:relative;min-height:clamp(380px,52vh,480px);background:var(--tile-bg);color:var(--tile-fg);overflow:hidden}
+.tile .wrap{position:relative;height:100%;min-height:inherit;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:center;gap:24px}
+.tile .copy{display:grid;gap:14px;justify-items:start;padding-block:40px 72px}
+.tile .kicker{display:inline-block;background:var(--yellow);color:#222;font-weight:900;font-size:13px;text-transform:uppercase;padding:4px 10px;border-radius:2px}
+.tile h1,.tile h2{font-weight:900;font-size:clamp(32px,4.4vw,54px);line-height:1.02;letter-spacing:-.01em;max-width:15ch}
+.tile p{margin:0;font-size:17px;max-width:40ch;opacity:.92}
+.tile .big{font-weight:900;font-size:clamp(36px,4vw,48px);line-height:1}
+.tile .big s{font-size:18px;font-weight:400;opacity:.7;margin-left:8px}
+.tile .ctas{display:flex;gap:10px;flex-wrap:wrap}
+.tile .shot{justify-self:center;width:min(100%,420px);aspect-ratio:1;background:#fff;border-radius:50%;display:grid;place-items:center;overflow:hidden}
+.tile .shot img{width:84%;height:84%;object-fit:contain;mix-blend-mode:multiply}
+.dots{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;display:flex;gap:8px;z-index:3}
+.dots button{width:10px;height:10px;border-radius:50%;padding:0;border:0;background:currentColor;opacity:.35;color:var(--dot,#fff)}
+.dots button[aria-current="true"]{opacity:1;width:26px;border-radius:5px}
+@media (max-width:760px){
+  .tile .wrap{grid-template-columns:minmax(0,1fr);gap:0}
+  .tile .shot{order:-1;width:62%;margin-top:24px}
+  .tile .copy{padding-block:16px 60px}
+}
+
+/* cómo funciona */
+.how{background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.how .wrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.step{display:flex;gap:14px;align-items:flex-start;padding:22px 20px}
+.step+.step{border-left:1px solid var(--line)}
+.step .n{flex:0 0 40px;height:40px;border-radius:50%;background:var(--sky);color:var(--blue);font-weight:900;font-size:18px;display:grid;place-items:center}
+.step b{display:block;font-size:17px}
+.step span{color:var(--ink-2);font-size:14px}
+@media (max-width:760px){.how .wrap{grid-template-columns:1fr}.step+.step{border-left:0;border-top:1px solid var(--line)}}
+
+/* secciones */
+section.sec{padding-block:36px 0}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.sec-head h2{font-size:clamp(22px,2.2vw,28px);font-weight:400;color:#444}
+.sec-head a{color:var(--blue-ink);font-weight:700;text-decoration:none;font-size:15px}
+.sec-head a:hover{text-decoration:underline}
+
+/* categorías destacadas */
+.catgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+@media (max-width:1023px){.catgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:560px){.catgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.catcard{background:var(--card);border-radius:4px;text-decoration:none;display:grid;justify-items:center;gap:8px;padding:16px 10px 18px;text-align:center;box-shadow:inset 0 0 0 1px transparent;transition:box-shadow .15s}
+.catcard:hover{box-shadow:inset 0 0 0 1px var(--blue)}
+.catcard img{width:78%;aspect-ratio:1;object-fit:contain}
+.catcard b{font-size:15px}
+.catcard span{font-size:13px;color:var(--ink-2)}
+
+/* fichas */
+.grid{display:grid;grid-template-columns:repeat(var(--cols,4),minmax(0,1fr));gap:12px}
+@media (max-width:1023px){.grid{--cols:3}}
+@media (max-width:640px){.grid{--cols:2;gap:8px}}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 48px)/5);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:4px}
+.rail::-webkit-scrollbar{display:none}
+.rail > *{scroll-snap-align:start}
+@media (max-width:1023px){.rail{grid-auto-columns:calc((100% - 24px)/3.2)}}
+@media (max-width:600px){.rail{grid-auto-columns:46%}}
+.card{background:var(--card);border-radius:4px;padding:14px;display:flex;flex-direction:column;gap:4px;min-width:0;position:relative}
+.card .ph{display:block;aspect-ratio:1;margin-bottom:8px;position:relative}
+.card .ph img{width:100%;height:100%;object-fit:contain;display:block}
+.tag{position:absolute;top:0;left:0;font-size:12px;font-weight:900;padding:3px 8px;border-radius:2px;text-transform:uppercase}
+.tag.off{background:var(--red);color:#fff}
+.tag.new{background:var(--yellow);color:#222}
+.tag.last{background:#fff;color:var(--red);box-shadow:inset 0 0 0 1px var(--red)}
+.card .brand{font-size:13px;color:var(--ink-2)}
+.card a.name{font-size:14px;text-decoration:none;line-height:1.35;min-height:2.7em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card a.name:hover{color:var(--blue-ink)}
+.price{font-weight:700;font-size:19px;font-variant-numeric:tabular-nums;margin-top:4px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+.price .now.sale{color:var(--red)}
+.price s{color:var(--mute);font-weight:400;font-size:14px}
+.price .unit{font-size:12px;font-weight:400;color:var(--ink-2);width:100%}
+.pick{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--green);font-weight:700;margin-top:4px}
+.pick svg{width:16px;height:16px;flex:0 0 auto}
+.pick.no{color:var(--mute);font-weight:400}
+.card .btn{margin-top:10px;min-height:40px;font-size:14px}
+
+/* banda azul */
+.promo{background:var(--blue);color:#fff;border-radius:4px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:center;gap:24px;padding:clamp(24px,4vw,44px);overflow:hidden}
+.promo h2{font-weight:900;font-size:clamp(26px,3vw,38px);line-height:1.05}
+.promo p{margin:10px 0 18px;max-width:46ch;color:#dbeaf7}
+.promo .ticket{justify-self:center}
+@media (max-width:760px){.promo{grid-template-columns:1fr}}
+
+/* ticket de retiro */
+.ticket{background:#fff;color:var(--ink);border-radius:6px;width:min(100%,320px);box-shadow:0 10px 30px rgba(0,0,0,.18);overflow:hidden}
+.ticket .tt{padding:16px 18px;border-bottom:2px dashed var(--line);text-align:center}
+.ticket .etq{font-size:14px;font-weight:700;color:var(--blue)}
+.ticket .cod{font-weight:900;font-size:38px;letter-spacing:.04em;font-variant-numeric:tabular-nums;line-height:1.1;margin:4px 0}
+.ticket .de{font-size:13px;color:var(--ink-2)}
+.ticket ul{list-style:none;margin:0;padding:14px 18px;display:grid;gap:10px;font-size:14px}
+.ticket li{display:flex;gap:10px;align-items:flex-start}
+.ticket li i{flex:0 0 22px;height:22px;border-radius:50%;background:var(--page);color:var(--ink-2);font-style:normal;font-size:12px;font-weight:700;display:grid;place-items:center}
+.ticket li.ok i{background:var(--green);color:#fff}
+.ticket small{display:block;color:var(--mute);font-size:12px}
+
+/* preguntas */
+.rows{background:var(--card);border-radius:4px;padding:0 20px}
+.rows details+details{border-top:1px solid var(--line)}
+.rows summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 0;font-weight:700}
+.rows summary::-webkit-details-marker{display:none}
+.rows summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--blue);border-bottom:2px solid var(--blue);transform:rotate(45deg) translateY(-3px);flex:0 0 auto}
+.rows details[open] summary::after{transform:rotate(-135deg)}
+.rows .body{padding:0 0 18px;color:var(--ink-2)}
+.rows .body p{margin:0}
+
+/* listado */
+.crumbs{font-size:14px;color:var(--ink-2);padding-top:20px}
+.crumbs a{color:var(--blue-ink);text-decoration:none}
+.crumbs a:hover{text-decoration:underline}
+.plp-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border-radius:4px;padding:12px 16px;margin-bottom:12px}
+.plp-head h1{font-size:20px;font-weight:700}
+.plp-head .n{font-size:14px;color:var(--ink-2)}
+select.sort{font:inherit;font-size:15px;border:1px solid var(--line);border-radius:4px;padding:9px 12px;background:#fff;color:var(--ink);min-width:200px}
+.plp{display:grid;grid-template-columns:250px minmax(0,1fr);gap:16px;padding:16px 0 24px}
+.plp .grid{--cols:3}
+@media (min-width:1180px){.plp .grid{--cols:4}}
+@media (max-width:640px){.plp .grid{--cols:2}}
+aside.filters{background:var(--card);border-radius:4px;align-self:start;position:sticky;top:96px}
+.fgroup{border-bottom:1px solid var(--line);padding:14px 16px}
+.fgroup:last-child{border-bottom:0}
+.fgroup h3{font-size:15px;margin-bottom:8px}
+.fgroup a{display:flex;justify-content:space-between;text-decoration:none;font-size:14px;padding:5px 0}
+.fgroup a span{color:var(--mute)}
+.fgroup a[aria-current="page"]{color:var(--blue);font-weight:700}
+.fgroup label{display:flex;gap:10px;align-items:center;font-size:14px;padding:5px 0;cursor:pointer}
+.fgroup input{width:18px;height:18px;accent-color:var(--blue);flex:0 0 auto}
+.plp-head .filt-toggle{display:none}
+@media (max-width:900px){
+  .plp{grid-template-columns:minmax(0,1fr)}
+  aside.filters{position:static;display:none}
+  aside.filters.on{display:block}
+  .plp-head .filt-toggle{display:inline-flex}
+}
+.empty-plp{background:var(--card);border-radius:4px;padding:40px 20px;color:var(--ink-2);grid-column:1/-1}
+
+/* ficha */
+.pdp{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;padding:16px 0 8px}
+.pdp > *{min-width:0}
+.pdp .shot{background:var(--card);border-radius:4px;aspect-ratio:1;display:grid;place-items:center;position:relative}
+.pdp .shot img{width:86%;height:86%;object-fit:contain}
+.pdp .shot .tag{top:16px;left:16px}
+.info{background:var(--card);border-radius:4px;padding:24px;display:grid;gap:16px;align-content:start}
+.info .brand{color:var(--ink-2);font-size:15px}
+.info h1{font-size:clamp(22px,2.2vw,28px);font-weight:700}
+.info .sku{font-size:13px;color:var(--mute)}
+.info .price{font-size:32px}
+.info .price s{font-size:17px}
+.info .lead{margin:0;color:var(--ink-2)}
+.opt-head{font-weight:700;font-size:14px;margin-bottom:8px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:0;box-shadow:inset 0 0 0 1px var(--line);background:#fff;border-radius:4px;padding:10px 14px;font-size:14px;text-align:left;line-height:1.25}
+.opt small{display:block;color:var(--ink-2);font-size:12px}
+.opt:hover{box-shadow:inset 0 0 0 1px var(--blue)}
+.opt[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--blue)}
+.buyrow{display:flex;gap:10px;align-items:stretch}
+.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:4px;background:#fff}
+.qty button{width:40px;height:44px;border:0;background:none;font-size:20px;color:var(--blue)}
+.qty button:disabled{color:var(--line);cursor:default}
+.qty output{min-width:30px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.buyrow .btn{flex:1}
+.pickbox{border:1px solid var(--line);border-radius:4px;padding:14px 16px;display:grid;gap:10px}
+.pickbox .row2{display:flex;gap:12px;align-items:flex-start}
+.pickbox svg{width:24px;height:24px;flex:0 0 auto;color:var(--blue)}
+.pickbox b{display:block;font-size:15px}
+.pickbox span{font-size:14px;color:var(--ink-2)}
+.pickbox .ok{color:var(--green)}
+.specs{background:var(--card);border-radius:4px;padding:20px 24px;margin-top:16px}
+.specs h2{font-size:20px;margin-bottom:12px}
+.specs table{border-collapse:collapse;width:100%;max-width:720px;font-size:15px}
+.specs td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.specs td:first-child{color:var(--ink-2);width:40%;padding-left:0}
+@media (max-width:860px){.pdp{grid-template-columns:minmax(0,1fr)}}
+
+/* carro lateral + checkout de retiro */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;opacity:0;transition:opacity .25s}
+.overlay.on{opacity:1}
+aside.cart{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--page);z-index:60;display:flex;flex-direction:column;transform:translateX(100%);padding-bottom:env(safe-area-inset-bottom,0px)}
+aside.cart.on{transform:none}
+.cart-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:var(--card);border-bottom:1px solid var(--line)}
+.cart-head h2{font-size:20px}
+.cart-head .x{width:40px;height:40px;border-radius:50%;border:0;background:var(--page);font-size:22px;line-height:1}
+.steps{display:flex;gap:6px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--line);font-size:13px;color:var(--mute)}
+.steps span{flex:1;padding-top:6px;border-top:3px solid var(--line)}
+.steps span.on{color:var(--blue);border-top-color:var(--blue);font-weight:700}
+.cart-body{flex:1;overflow-y:auto;padding:12px 20px 20px;display:grid;gap:10px;align-content:start}
+.box{background:var(--card);border-radius:4px;padding:14px 16px}
+.box h3{font-size:15px;margin-bottom:10px}
+.line{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;align-items:start}
+.line+.line{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.line img{width:72px;height:72px;object-fit:contain;background:#fff}
+.line h4{font-size:14px;font-weight:400;line-height:1.3}
+.line .var{font-size:12px;color:var(--ink-2)}
+.line .qty{margin-top:8px;width:max-content}
+.line .qty button{width:32px;height:32px;font-size:17px}
+.line .rm{background:none;border:0;color:var(--blue-ink);font-size:13px;padding:0;margin-top:6px;text-decoration:underline}
+.line .lp{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cart-foot{background:var(--card);border-top:1px solid var(--line);padding:14px 20px;display:grid;gap:8px}
+.r{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.r.total{font-weight:900;font-size:20px}
+.r .free{color:var(--green);font-weight:700}
+.empty{display:grid;gap:14px;justify-items:start;padding:32px 4px}
+.hours{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.hours label{position:relative}
+.hours input{position:absolute;opacity:0;inset:0}
+.hours span{display:grid;gap:2px;border-radius:4px;box-shadow:inset 0 0 0 1px var(--line);padding:10px 12px;font-size:14px;font-weight:700;background:#fff;cursor:pointer}
+.hours small{font-weight:400;color:var(--ink-2);font-size:12px}
+.hours input:checked+span{box-shadow:inset 0 0 0 2px var(--blue);color:var(--blue)}
+.hours input:focus-visible+span{outline:2px solid var(--blue);outline-offset:2px}
+.hours input:disabled+span{opacity:.45;cursor:not-allowed;text-decoration:line-through}
+.form{display:grid;gap:12px}
+.form label{display:grid;gap:4px;font-size:13px;font-weight:700}
+.form input{font:inherit;font-weight:400;border:1px solid #b9b9b9;border-radius:4px;padding:11px 12px;width:100%;min-width:0;background:#fff;color:var(--ink)}
+.form input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.form input[aria-invalid="true"]{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.err{color:var(--red);font-size:12px;font-weight:400}
+.pays{display:grid;gap:8px}
+.pays label{display:flex;gap:10px;align-items:flex-start;border-radius:4px;box-shadow:inset 0 0 0 1px var(--line);padding:12px;cursor:pointer;font-size:14px}
+.pays label:has(input:checked){box-shadow:inset 0 0 0 2px var(--blue)}
+.pays input{accent-color:var(--blue);width:18px;height:18px;margin:1px 0 0;flex:0 0 auto}
+.pays small{display:block;color:var(--ink-2);font-size:12px}
+.note{font-size:13px;color:var(--ink-2);background:var(--sky);border-radius:4px;padding:10px 12px}
+.done{display:grid;gap:14px;justify-items:center;text-align:center;padding-top:8px}
+.done h3{font-size:22px}
+.done .ticket{box-shadow:0 0 0 1px var(--line);text-align:left}
+.done .ticket .tt{text-align:center}
+.done .when{background:var(--green-bg);color:var(--green);font-weight:700;border-radius:4px;padding:10px 14px;width:100%}
+
+/* pie */
+footer.foot{background:var(--slate);color:#c9d2db;margin-top:48px;padding-block:36px 24px;font-size:14px}
+.foot .cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.foot h4{color:#fff;font-size:15px;margin-bottom:10px}
+.foot a{display:block;text-decoration:none;padding:3px 0}
+.foot a:hover{color:#fff;text-decoration:underline}
+.foot .fine{margin-top:28px;padding-top:16px;border-top:1px solid #4a5663;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px;color:#9aa7b4}
+@media (max-width:760px){.foot .cols{grid-template-columns:1fr 1fr}}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);background:var(--slate);color:#fff;padding:12px 20px;border-radius:4px;font-weight:700;font-size:14px;z-index:70;opacity:0;transition:.25s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="franja"><div class="wrap">
+  <span><b>Retiro en tienda</b> · sin costo y sin fila</span>
+  <span class="demo">Demo navegable: productos y precios de ejemplo</span>
+</div></div>
+
+<header class="top"><div class="wrap">
+  <a class="logo" href="#inicio" aria-label="Ferretería, ir al inicio">
+    <span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5a4 4 0 0 0-5.3 5.3L3.5 17.5l3 3 5.7-5.7a4 4 0 0 0 5.3-5.3l-2.4 2.4-2.4-.6-.6-2.4z"/></svg></span>
+    <span><b>Ferretería</b><small>Coyhaique</small></span>
+  </a>
+  <form class="search" id="searchForm" role="search">
+    <input id="q" type="search" placeholder="¿Qué necesitas? Ej: taladro, tornillos, silicona" aria-label="Buscar productos" autocomplete="off">
+    <button aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+  </form>
+  <div class="right">
+    <div class="store"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><span>Retiras en<b>Coyhaique centro</b></span></div>
+    <button class="icon-btn" id="openCart" aria-label="Abrir carro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h2.6l2.3 11h10.8l2.1-7.5H6.4"/><circle cx="9.5" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg><span class="count" id="cartCount"></span></button>
+  </div>
+</div></header>
+
+<nav class="cats-bar" aria-label="Categorías"><div class="wrap" id="catsBar"></div></nav>
+
+<main id="app"></main>
+
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><h4>Categorías</h4><div id="footCats"></div></div>
+    <div><h4>Cómo comprar</h4><a href="#inicio-como">Cómo funciona el retiro</a><a href="#inicio-faq">Preguntas frecuentes</a><a href="#tienda">Ver todo el catálogo</a></div>
+    <div><h4>La tienda</h4><a href="#inicio-faq">Horario: lun a sáb 9:00 a 19:00</a><a href="#inicio-faq">Coyhaique centro</a><a href="#inicio-faq">Pago en línea o en caja</a></div>
+    <div><h4>Contacto</h4><a href="#inicio-faq">WhatsApp de la tienda</a><a href="#inicio-faq">Cotizaciones para obras</a></div>
+  </div>
+  <div class="fine"><span>© 2026 Ferretería · Coyhaique, Aysén</span><span>Precios de ejemplo para la demo</span></div>
+</div></footer>
+
+<div class="overlay" id="overlay" hidden></div>
+<aside class="cart" id="cart" aria-label="Carro" aria-hidden="true">
+  <div class="cart-head"><h2 id="cartTitle">Tu carro</h2><button class="x" id="closeCart" aria-label="Cerrar carro">×</button></div>
+  <div class="steps" id="steps"><span>1. Carro</span><span>2. Retiro</span><span>3. Código</span></div>
+  <div class="cart-body" id="cartBody"></div>
+  <div class="cart-foot" id="cartFoot"></div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== EDITAR ACÁ ===== */
+const CONFIG = {
+  negocio: "Ferretería",
+  ciudad:  "Coyhaique",
+  api:     "demo",   // 'demo' = sin servidor. En producción: URL del webhook que registra el pedido.
+  prefijo: "FR",
+};
+/* ====================== */
+
+const CATS = {
+  manuales:    {name:"Herramientas manuales", short:"Manuales", icon:"hammer", hero:"martillo"},
+  electricas:  {name:"Herramientas eléctricas", short:"Eléctricas", icon:"drill", hero:"taladro"},
+  fijaciones:  {name:"Fijaciones", short:"Fijaciones", icon:"screw", hero:"tornillos"},
+  pinturas:    {name:"Pinturas", short:"Pinturas", icon:"roller", hero:"esmalte"},
+  gasfiteria:  {name:"Gasfitería y electricidad", short:"Gasfitería", icon:"tap", hero:"llave"},
+  construccion:{name:"Construcción y jardín", short:"Construcción", icon:"shovel", hero:"carretilla"}
+};
+// v: variantes [nombre, precio, detalle]. before = precio normal si está en oferta. stock: unidades en tienda.
+const PRODUCTS = [
+  {id:"martillo", cat:"manuales", brand:"Forja", name:"Martillo carpintero 16 oz mango de fibra", price:8990, stock:14, badge:"Más vendido",
+   lead:"Cabeza de acero forjado con uña curva para sacar clavos y mango de fibra de vidrio con grip de goma que absorbe el golpe.",
+   specs:[["Peso de la cabeza","16 oz (450 g)"],["Mango","Fibra de vidrio con grip"],["Largo","33 cm"]]},
+  {id:"destornilladores", cat:"manuales", brand:"Forja", name:"Set de 6 destornilladores paleta y cruz", price:9990, before:12990, stock:9,
+   lead:"Tres paletas y tres cruz (Phillips) con punta imantada y mango bimaterial para hacer fuerza sin resbalar.",
+   specs:[["Piezas","6"],["Puntas","Paleta 3, 5, 6 mm · Cruz PH0, PH1, PH2"],["Punta","Imantada"]]},
+  {id:"alicate", cat:"manuales", brand:"Forja", name:"Alicate universal 8\" mango aislado", price:7490, stock:11,
+   lead:"Para cortar, doblar y sujetar alambre. Mangos aislados para trabajos eléctricos domiciliarios.",
+   specs:[["Largo","8\" (200 mm)"],["Acero","Cromo vanadio"],["Mango","Aislado bimaterial"]]},
+  {id:"huincha", cat:"manuales", brand:"Medix", name:"Huincha de medir 5 m", price:4990, stock:22,
+   lead:"Cinta de acero de 19 mm con freno, gancho de doble remache y carcasa antigolpes con clip para el cinturón.",
+   specs:[["Largo","5 m"],["Ancho de cinta","19 mm"],["Graduación","cm y pulgadas"]]},
+  {id:"nivel", cat:"manuales", brand:"Medix", name:"Nivel de aluminio 60 cm, 3 burbujas", price:8490, stock:6,
+   lead:"Perfil de aluminio con burbuja horizontal, vertical y de 45°. Base fresada para que no se balancee.",
+   specs:[["Largo","60 cm"],["Burbujas","3 (0°, 90°, 45°)"],["Precisión","0,5 mm/m"]]},
+  {id:"serrucho", cat:"manuales", brand:"Forja", name:"Serrucho carpintero 20\"", price:9990, stock:3,
+   lead:"Dientes templados triple filo para cortar madera y aglomerado en ambos sentidos.",
+   specs:[["Largo de hoja","20\" (500 mm)"],["Dientes","7 por pulgada"],["Mango","Plástico ergonómico"]]},
+
+  {id:"taladro", cat:"electricas", brand:"Voltrix", name:"Taladro percutor 650 W, mandril 13 mm", price:39990, before:49990, stock:5, badge:"Oferta",
+   lead:"Taladra en concreto, madera y metal. Velocidad variable, reversa y empuñadura lateral. Incluye tope de profundidad.",
+   specs:[["Potencia","650 W"],["Mandril","13 mm con llave"],["Velocidad","0 – 2.800 rpm"],["Garantía","1 año"]]},
+  {id:"atornillador", cat:"electricas", brand:"Voltrix", name:"Atornillador inalámbrico 12 V con 2 baterías", price:44990, stock:7, badge:"Nuevo",
+   lead:"Liviano para armar muebles y colgar cosas. Dos baterías de litio y cargador: mientras una carga, trabajas con la otra.",
+   specs:[["Voltaje","12 V litio"],["Baterías","2 × 1,5 Ah"],["Torque","25 Nm, 18 posiciones"],["Garantía","1 año"]]},
+  {id:"esmeril", cat:"electricas", brand:"Voltrix", name:"Esmeril angular 4½\" 850 W", price:34990, stock:8,
+   lead:"Para cortar fierro, desbastar soldadura y pulir. Protector regulable sin herramientas y mango lateral en dos posiciones.",
+   specs:[["Potencia","850 W"],["Disco","115 mm (4½\")"],["Velocidad","11.000 rpm"],["Garantía","1 año"]]},
+  {id:"sierra", cat:"electricas", brand:"Voltrix", name:"Sierra circular 7¼\" 1.400 W", price:69990, stock:2,
+   lead:"Corta tablas y planchas de hasta 63 mm. Base de aluminio con ajuste de bisel 0 – 45° y guía paralela.",
+   specs:[["Potencia","1.400 W"],["Disco","185 mm (7¼\"), 24 dientes incluido"],["Corte a 90°","63 mm"],["Garantía","1 año"]]},
+  {id:"lijadora", cat:"electricas", brand:"Voltrix", name:"Lijadora orbital ¼ hoja 240 W", price:29990, stock:6,
+   lead:"Deja la madera lista para pintar o barnizar. Bolsa recolectora de polvo y fijación de lija por prensa.",
+   specs:[["Potencia","240 W"],["Base","110 × 100 mm"],["Órbitas","13.000 opm"]]},
+  {id:"caladora", cat:"electricas", brand:"Voltrix", name:"Caladora 600 W con 3 hojas", price:36990, before:42990, stock:4,
+   lead:"Cortes curvos y rectos en madera, metal y PVC. Movimiento pendular de 4 posiciones y soplador de viruta.",
+   specs:[["Potencia","600 W"],["Corte en madera","65 mm"],["Incluye","3 hojas (madera, metal, PVC)"]]},
+
+  {id:"tornillos", cat:"fijaciones", brand:"Fijatec", name:"Tornillo volcanita 6 × 1¼\" punta fina", price:2990, stock:40,
+   v:[["Caja 100 un",2990],["Caja 500 un",11990,"Ahorras $2.960"]],
+   lead:"Cabeza de trompeta y fosfatado negro para fijar volcanita a perfil metálico o madera.",
+   specs:[["Medida","6 × 1¼\" (3,5 × 32 mm)"],["Punta","Fina"],["Terminación","Fosfatado negro"]]},
+  {id:"clavos", cat:"fijaciones", brand:"Fijatec", name:"Clavo corriente 2½\" bolsa 1 kg", price:2490, stock:35,
+   lead:"Clavo de acero con cabeza plana para carpintería en general y moldajes.",
+   specs:[["Largo","2½\" (65 mm)"],["Contenido","1 kg (aprox. 190 un)"]]},
+  {id:"tarugos", cat:"fijaciones", brand:"Fijatec", name:"Tarugo plástico 8 mm, 100 unidades", price:2290, stock:28,
+   lead:"Para colgar repisas, cuadros y muebles en muro de ladrillo u hormigón. Aletas antigiro.",
+   specs:[["Diámetro","8 mm"],["Tornillo recomendado","8 × 1½\""],["Contenido","100 un"]]},
+  {id:"pernos", cat:"fijaciones", brand:"Fijatec", name:"Perno hexagonal ⅜ × 2\" con tuerca y golilla, 10 un", price:3490, stock:16,
+   lead:"Perno zincado para estructuras de madera y metal. Cada uno con su tuerca y golilla plana.",
+   specs:[["Medida","⅜ × 2\""],["Terminación","Zincado"],["Contenido","10 juegos"]]},
+  {id:"bisagras", cat:"fijaciones", brand:"Fijatec", name:"Bisagra de acero 3\", par", price:1990, stock:3,
+   lead:"Bisagra rectangular con pasador fijo, para puertas de interior y muebles. Incluye tornillos.",
+   specs:[["Medida","3\" (76 mm)"],["Material","Acero zincado"],["Contenido","2 bisagras + tornillos"]]},
+  {id:"silicona", cat:"fijaciones", brand:"Sellex", name:"Silicona transparente 280 ml", price:3990, stock:19,
+   lead:"Sella baños, cocinas, ventanas y canaletas. Antihongos y resistente al agua una vez seca.",
+   specs:[["Contenido","280 ml"],["Color","Transparente"],["Secado al tacto","15 minutos"]]},
+
+  {id:"esmalte", cat:"pinturas", brand:"Colorsur", name:"Esmalte al agua blanco", price:19990, stock:12,
+   v:[["Galón (3,78 L)",19990,"Rinde 40 m²"],["¼ galón (0,95 L)",6490,"Rinde 10 m²"]],
+   lead:"Para muros interiores y exteriores, madera y fierro con anticorrosivo. Lavable, casi sin olor y seca en una hora.",
+   specs:[["Terminación","Satinada"],["Rendimiento","35 a 40 m² por galón a una mano"],["Secado","1 hora al tacto · 4 h para 2ª mano"]]},
+  {id:"rodillo", cat:"pinturas", brand:"Colorsur", name:"Rodillo 23 cm felpa antigota", price:4490, stock:15,
+   lead:"Felpa de pelo medio que carga bien la pintura y no salpica. Mango con rosca para extensión.",
+   specs:[["Ancho","23 cm"],["Felpa","Pelo medio 12 mm"],["Uso","Látex y esmalte al agua"]]},
+  {id:"brocha", cat:"pinturas", brand:"Colorsur", name:"Brocha 3\" mango de madera", price:2490, stock:24,
+   lead:"Cerda mixta para recortes, marcos y esquinas donde no entra el rodillo.",
+   specs:[["Ancho","3\" (75 mm)"],["Cerda","Mixta"],["Mango","Madera"]]},
+  {id:"bandeja", cat:"pinturas", brand:"Colorsur", name:"Bandeja para pintura 23 cm", price:2990, stock:18,
+   lead:"Bandeja plástica con escurridor para descargar el rodillo de forma pareja.",
+   specs:[["Para rodillo","Hasta 23 cm"],["Material","Plástico resistente"]]},
+  {id:"enmascarar", cat:"pinturas", brand:"Colorsur", name:"Cinta de enmascarar 24 mm × 40 m", price:1990, stock:30,
+   lead:"Protege marcos, enchufes y zócalos. Se despega limpio hasta 3 días después.",
+   specs:[["Ancho","24 mm"],["Largo","40 m"]]},
+  {id:"lija", cat:"pinturas", brand:"Colorsur", name:"Lija al agua grano 220", price:590, stock:60,
+   v:[["1 pliego",590],["Pack 10 pliegos",4990,"Ahorras $910"]],
+   lead:"Para lijar entre manos de pintura y dejar superficies lisas. Se usa en seco o con agua.",
+   specs:[["Grano","220"],["Medida","23 × 28 cm"]]},
+
+  {id:"teflon", cat:"gasfiteria", brand:"Hidra", name:"Cinta teflón ½\" × 10 m", price:590, stock:50,
+   lead:"Sella hilos de cañerías y llaves para que no goteen. Se enrolla en el sentido del hilo.",
+   specs:[["Ancho","½\" (12 mm)"],["Largo","10 m"]]},
+  {id:"aisladora", cat:"gasfiteria", brand:"Hidra", name:"Huincha aisladora 18 mm × 10 m negra", price:990, stock:38,
+   lead:"Cinta de PVC para aislar empalmes eléctricos domiciliarios. Flexible y autoextinguible.",
+   specs:[["Ancho","18 mm"],["Largo","10 m"],["Tensión","Hasta 600 V"]]},
+  {id:"llave", cat:"gasfiteria", brand:"Hidra", name:"Llave de paso ½\" bronce, manilla mariposa", price:6990, stock:9,
+   lead:"Llave de bola de bronce para cortar el agua a un artefacto o a toda la casa.",
+   specs:[["Medida","½\" hilo HI-HI"],["Material","Bronce"],["Presión máx.","16 bar"]]},
+  {id:"flexible", cat:"gasfiteria", brand:"Hidra", name:"Flexible de agua 40 cm malla de acero", price:2990, stock:20,
+   lead:"Conecta lavamanos, lavaplatos y WC a la llave de paso. Malla de acero inoxidable.",
+   specs:[["Largo","40 cm"],["Conexión","½\" HI × ½\" HI"]]},
+  {id:"ampolleta", cat:"gasfiteria", brand:"Lumo", name:"Ampolleta LED 9 W luz cálida E27", price:1490, stock:45,
+   v:[["1 unidad",1490],["Pack 4 unidades",4990,"Ahorras $970"]],
+   lead:"Equivale a una ampolleta de 60 W y gasta 85% menos. Luz cálida para living y dormitorios.",
+   specs:[["Potencia","9 W (equivale a 60 W)"],["Luz","Cálida 3.000 K"],["Base","E27"],["Vida útil","15.000 horas"]]},
+  {id:"zapatilla", cat:"gasfiteria", brand:"Lumo", name:"Zapatilla eléctrica 6 enchufes con interruptor", price:7990, stock:10,
+   lead:"Seis enchufes, interruptor iluminado y protección contra sobrecarga. Cable de 1,5 m.",
+   specs:[["Enchufes","6"],["Cable","1,5 m"],["Capacidad","10 A, 2.500 W"]]},
+
+  {id:"guantes", cat:"construccion", brand:"Obrax", name:"Guantes de trabajo recubiertos de nitrilo", price:2990, stock:26,
+   lead:"Palma recubierta para agarrar fierro, ladrillo y madera sin resbalar. Respiran por el dorso.",
+   specs:[["Talla","Única (L)"],["Recubrimiento","Nitrilo"]]},
+  {id:"lentes", cat:"construccion", brand:"Obrax", name:"Lentes de seguridad claros antiempañante", price:1990, stock:21,
+   lead:"Protección para esmerilar, cortar y taladrar. Lente de policarbonato con protección lateral.",
+   specs:[["Lente","Policarbonato claro"],["Tratamiento","Antiempañante y antirrayas"]]},
+  {id:"cemento", cat:"construccion", brand:"Obrax", name:"Cemento especial saco 25 kg", price:5490, stock:60,
+   lead:"Para radieres, pegar ladrillos y estucos. Te lo dejamos cargado en tu vehículo al retirar.",
+   specs:[["Peso","25 kg"],["Uso","Hormigones, morteros y estucos"]]},
+  {id:"carretilla", cat:"construccion", brand:"Obrax", name:"Carretilla 90 L rueda neumática", price:49990, before:56990, stock:3, badge:"Oferta",
+   lead:"Tolva metálica de 90 litros, rueda inflable de 16\" y mangos con puño de goma.",
+   specs:[["Capacidad","90 L"],["Rueda","Neumática 16\""],["Carga máx.","150 kg"]]},
+  {id:"pala", cat:"construccion", brand:"Obrax", name:"Pala punta huevo mango de madera", price:12990, stock:8,
+   lead:"Para cavar, mover tierra y preparar mezcla. Hoja de acero templado y mango largo de madera.",
+   specs:[["Hoja","Acero templado"],["Largo total","1,2 m"]]},
+  {id:"manguera", cat:"construccion", brand:"Obrax", name:"Manguera de jardín ½\" × 15 m con pistola", price:14990, stock:0,
+   lead:"Manguera reforzada que no se dobla, con conectores rápidos y pistola de riego de 7 chorros.",
+   specs:[["Diámetro","½\""],["Largo","15 m"],["Incluye","Pistola y conectores"]]}
+];
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const clp = n => "$" + n.toLocaleString("es-CL");
+const byId = id => PRODUCTS.find(p => p.id === id);
+const esc = v => String(v).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const vars = p => p.v || [["Unidad", p.price]];
+const ICONS = {
+  hammer:'<path d="M14 5l5 5-2 2-5-5zM12 7L4 15l2.5 2.5L14.5 9.5"/><path d="M13 4l2-1 6 6-1 2"/>',
+  drill:'<path d="M4 7h11v6H4zM15 9h3M18 8.5h3v1h-3"/><path d="M7 13l-1 7h4l1-7"/>',
+  screw:'<path d="M8 4h8M12 4v16"/><path d="M9 8l6 1.5M9 11.5l6 1.5M9 15l6 1.5"/><path d="M12 20l-1-1.5h2z"/>',
+  roller:'<rect x="4" y="3.5" width="14" height="5" rx="1"/><path d="M18 6h2v5h-8v3"/><rect x="10.5" y="14" width="3" height="7" rx="1"/>',
+  tap:'<path d="M4 10h9a4 4 0 0 1 4 4v1"/><path d="M4 14h6"/><path d="M8 10V6M5 6h6"/><path d="M17 18.5c0 1-1 1.5-1 1.5s-1-.5-1-1.5 1-2 1-2 1 1 1 2z"/>',
+  shovel:'<path d="M15 9l5-5M18 2.5l3.5 3.5"/><path d="M12.5 8.5l3 3-5.5 5.5a3 3 0 0 1-4.2 0l-1.3-1.3a3 3 0 0 1 0-4.2z"/>',
+  pin:'<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  bag:'<path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>',
+  car:'<path d="M3 16v-4l2-5h14l2 5v4z"/><circle cx="7.5" cy="16.5" r="1.8"/><circle cx="16.5" cy="16.5" r="1.8"/><path d="M5 12h14"/>'
+};
+const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+
+/* horario de la tienda: lunes a sábado 9 a 19 h; el pedido queda listo en 1 hora */
+const OPEN = 9, CLOSE = 19;
+function slots(){
+  const out = [], now = new Date();
+  for(let d = 0; out.length < 6 && d < 4; d++){
+    const day = new Date(now); day.setDate(now.getDate() + d);
+    if(day.getDay() === 0) continue;
+    const label = d === 0 ? "Hoy" : d === 1 ? "Mañana" : day.toLocaleDateString("es-CL",{weekday:"long"}).replace(/^./,c=>c.toUpperCase());
+    for(const [a,b] of [[OPEN,12],[12,15],[15,CLOSE]]){
+      if(d === 0 && now.getHours() + 1 >= b) continue;   // hoy solo los tramos donde alcanza a estar listo (1 hora)
+      if(out.length < 6) out.push({v:`${label} ${a}:00 – ${b}:00`, day:label, h:`${a}:00 a ${b}:00`});
+    }
+  }
+  return out;
+}
+const pickText = p => p.stock === 0 ? "Sin stock para retiro" : slots()[0].day === "Hoy" ? "Retíralo hoy" : `Retíralo ${slots()[0].day === "Mañana" ? "mañana" : "el " + slots()[0].day.toLowerCase()}`;
+
+/* ---------- piezas de vista ---------- */
+function priceHTML(p, price = p.price, unitNote = ""){
+  const sale = p.before && price === p.price;
+  return `<div class="price"><span class="now ${sale?"sale":""}">${clp(price)}</span>${sale?`<s>${clp(p.before)}</s>`:""}${unitNote?`<span class="unit">${unitNote}</span>`:""}</div>`;
+}
+function tagHTML(p){
+  if(p.stock === 0) return `<span class="tag last">Agotado</span>`;
+  if(p.before) return `<span class="tag off">-${Math.round((p.before-p.price)/p.before*100)}%</span>`;
+  if(p.stock <= 3) return `<span class="tag last">Últimas ${p.stock}</span>`;
+  if(p.badge === "Nuevo") return `<span class="tag new">Nuevo</span>`;
+  return "";
+}
+function cardHTML(p){
+  return `<div class="card">
+    <a class="ph" href="#p-${p.id}" tabindex="-1" aria-hidden="true"><img src="img/${p.id}.jpg" alt="" loading="lazy" width="800" height="800">${tagHTML(p)}</a>
+    <span class="brand">${p.brand}</span>
+    <a class="name" href="#p-${p.id}">${p.name}</a>
+    ${priceHTML(p, p.price, p.v ? p.v[0][0] : "")}
+    <span class="pick ${p.stock?"":"no"}">${icon(p.stock?"check":"clock")}${pickText(p)}</span>
+    ${p.stock ? `<button class="btn blue block" data-add="${p.id}">Agregar al carro</button>` : `<a class="btn line block" href="#p-${p.id}">Ver producto</a>`}
+  </div>`;
+}
+
+const TILES = [
+  {img:"taladro", bg:"#0072ce", fg:"#ffffff", kicker:"Oferta de la semana", title:"Taladro percutor 650 W", text:"Pídelo ahora y pasa a buscarlo hoy mismo, sin hacer fila en caja.", price:39990, before:49990, cta:["Lo quiero","#p-taladro"], alt:"Taladro percutor"},
+  {img:"esmalte", bg:"#343e49", fg:"#ffffff", kicker:"Pinta este fin de semana", title:"Todo para pintar, listo para retirar", text:"Esmalte al agua, rodillo, brocha y cinta. Lo dejamos armado en una bolsa con tu nombre.", cta:["Ver pinturas","#tienda-pinturas"], alt:"Galón de esmalte al agua"},
+  {img:"cemento", bg:"#e4f1fb", fg:"#1d2a36", kicker:"Para la obra", title:"Pide el cemento y te lo cargamos al auto", text:"Llegas, das tu código y el saco va directo a tu vehículo. Sin cargar de un lado a otro.", cta:["Ver construcción","#tienda-construccion"], alt:"Saco de cemento"}
+];
+
+function viewHome(){
+  const tiles = TILES.map((t,i)=>`<div class="tile" style="--tile-bg:${t.bg};--tile-fg:${t.fg}" role="group" aria-roledescription="diapositiva" aria-label="${i+1} de ${TILES.length}"><div class="wrap">
+      <div class="copy"><span class="kicker">${t.kicker}</span>${i?`<h2>${t.title}</h2>`:`<h1>${t.title}</h1>`}<p>${t.text}</p>
+        ${t.price?`<div class="big">${clp(t.price)}<s>${clp(t.before)}</s></div>`:""}
+        <div class="ctas"><a class="btn ${t.bg==="#e4f1fb"?"blue":"white"}" href="${t.cta[1]}">${t.cta[0]}</a></div></div>
+      <div class="shot"><img src="img/${t.img}.jpg" alt="${t.alt}" ${i?'loading="lazy"':'fetchpriority="high"'}></div>
+    </div></div>`).join("");
+  const dots = TILES.map((_,i)=>`<button data-dot="${i}" aria-label="Ir a la diapositiva ${i+1}"></button>`).join("");
+  const catcards = Object.entries(CATS).map(([k,c])=>`<a class="catcard" href="#tienda-${k}"><img src="img/${c.hero}.jpg" alt="" loading="lazy"><b>${c.short}</b><span>${PRODUCTS.filter(p=>p.cat===k).length} productos</span></a>`).join("");
+  const ofertas = PRODUCTS.filter(p=>p.before || p.v).map(cardHTML).join("");
+  const top = ["martillo","atornillador","silicona","tornillos","ampolleta","guantes","huincha","esmeril"].map(id=>cardHTML(byId(id))).join("");
+  return `
+  <section class="campaign" id="carousel" aria-label="Destacados">
+    <div class="track" id="track">${tiles}</div>
+    <div class="dots" id="dots">${dots}</div>
+  </section>
+  <section class="how" id="como" aria-label="Cómo funciona"><div class="wrap">
+    <div class="step"><span class="n">1</span><div><b>Pide en la página</b><span>Ves el stock real de la tienda y pagas en línea o al retirar.</span></div></div>
+    <div class="step"><span class="n">2</span><div><b>Elige a qué hora pasas</b><span>Armamos tu pedido y lo dejamos apartado con tu nombre.</span></div></div>
+    <div class="step"><span class="n">3</span><div><b>Retira sin fila</b><span>Muestras tu código en el mesón de retiro y te vas.</span></div></div>
+  </div></section>
+
+  <section class="sec wrap"><div class="sec-head"><h2>Categorías</h2><a href="#tienda">Ver todo el catálogo</a></div><div class="catgrid">${catcards}</div></section>
+  <section class="sec wrap"><div class="sec-head"><h2>Ofertas y packs</h2><a href="#tienda-ofertas">Ver todas</a></div><div class="rail">${ofertas}</div></section>
+  <section class="sec wrap"><div class="sec-head"><h2>Lo que más se lleva la gente</h2><a href="#tienda">Ver todo</a></div><div class="grid">${top}</div></section>
+
+  <section class="sec wrap"><div class="promo">
+    <div><h2>Tu pedido te espera armado en el mesón</h2><p>Sin recorrer pasillos ni hacer la fila de la caja. Si pagaste en línea, solo muestras el código. Si prefieres pagar en la tienda, lo haces en el mesón de retiro.</p><a class="btn white" href="#tienda">Empezar a pedir</a></div>
+    <div class="ticket" aria-hidden="true"><div class="tt"><span class="etq">Código de retiro</span><div class="cod">${CONFIG.prefijo}-0427</div><div class="de">Muéstralo en el mesón de retiro</div></div>
+      <ul><li class="ok"><i>✓</i><span>Pedido recibido<small>3 productos · pagado en línea</small></span></li><li class="ok"><i>✓</i><span>Listo para retirar<small>Hoy de 15:00 a 19:00</small></span></li><li><i>3</i><span>Retiras sin fila</span></li></ul></div>
+  </div></section>
+
+  <section class="sec wrap" id="faq"><div class="sec-head"><h2>Preguntas frecuentes</h2></div><div class="rows">
+    <details><summary>¿Cuánto demora en estar listo mi pedido?</summary><div class="body"><p>Una hora desde que lo haces, dentro del horario de la tienda (lunes a sábado de 9:00 a 19:00). Si pides de noche, queda listo a primera hora del día siguiente.</p></div></details>
+    <details><summary>¿Tengo que pagar en la página?</summary><div class="body"><p>No. Puedes pagar en línea con Webpay o Mercado Pago, o pagar al retirar en el mesón con efectivo, débito o crédito.</p></div></details>
+    <details><summary>¿Y si no alcanzo a llegar en la hora que elegí?</summary><div class="body"><p>Te guardamos el pedido hasta el cierre del día siguiente. Si necesitas más tiempo, escríbenos por WhatsApp con tu código.</p></div></details>
+    <details><summary>¿El stock que veo es real?</summary><div class="body"><p>Sí, es el stock de la tienda. Al confirmar tu pedido los productos quedan apartados a tu nombre y nadie más los puede llevar.</p></div></details>
+    <details><summary>¿Puede retirar otra persona?</summary><div class="body"><p>Sí, basta con que muestre el código de retiro y diga el nombre con que se hizo el pedido.</p></div></details>
+    <details><summary>¿Hacen cotizaciones para obras?</summary><div class="body"><p>Sí. Arma el carro con lo que necesitas y escríbenos por WhatsApp: te mandamos precio por volumen y lo dejamos listo para retiro.</p></div></details>
+  </div></section>`;
+}
+
+const PRICES = [["0-5000","Hasta $5.000",0,5000],["5000-20000","$5.000 a $20.000",5000,20000],["20000-50000","$20.000 a $50.000",20000,50000],["50000-","Más de $50.000",50000,1e9]];
+let shop = {q:"", sort:"dest", prices:new Set(), today:false};
+function viewShop(cat){
+  const title = cat === "ofertas" ? "Ofertas y packs" : cat ? CATS[cat].name : (shop.q ? `Resultados para “${esc(shop.q)}”` : "Todo el catálogo");
+  const links = [["","Todo el catálogo",PRODUCTS.length],...Object.entries(CATS).map(([k,c])=>[k,c.name,PRODUCTS.filter(p=>p.cat===k).length]),["ofertas","Ofertas y packs",PRODUCTS.filter(p=>p.before||p.v).length]];
+  return `<div class="wrap">
+    <div class="crumbs"><a href="#inicio">Inicio</a> › ${cat?`<a href="#tienda">Catálogo</a> › ${title}`:"Catálogo"}</div>
+    <div class="plp">
+      <aside class="filters" id="filters" aria-label="Filtros">
+        <div class="fgroup"><h3>Categoría</h3>${links.map(([k,n,c])=>`<a href="#tienda${k?"-"+k:""}" ${k===cat?'aria-current="page"':""}>${n}<span>${c}</span></a>`).join("")}</div>
+        <div class="fgroup"><h3>Retiro</h3><label><input type="checkbox" id="fToday" ${shop.today?"checked":""}> Solo con stock para retirar hoy</label></div>
+        <div class="fgroup"><h3>Precio</h3>${PRICES.map(([k,n])=>`<label><input type="checkbox" data-fprice="${k}" ${shop.prices.has(k)?"checked":""}> ${n}</label>`).join("")}</div>
+      </aside>
+      <div>
+        <div class="plp-head"><div><h1>${title}</h1><span class="n" id="plpN"></span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn line filt-toggle" id="filtBtn" type="button">Filtrar</button>
+          <select class="sort" id="sort" aria-label="Ordenar por"><option value="dest">Ordenar por: Recomendados</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option><option value="off">Mayor descuento</option></select></div></div>
+        <div class="grid" id="plpGrid"></div>
+      </div>
+    </div></div>`;
+}
+function fillShop(cat){
+  const q = shop.q.trim().toLowerCase();
+  let list = PRODUCTS.filter(p => !cat || (cat === "ofertas" ? (p.before || p.v) : p.cat === cat));
+  if(q) list = list.filter(p => (p.name + " " + p.brand + " " + CATS[p.cat].name).toLowerCase().includes(q));
+  if(shop.today) list = list.filter(p => p.stock > 0);
+  if(shop.prices.size) list = list.filter(p => [...shop.prices].some(k => { const r = PRICES.find(x=>x[0]===k); return p.price >= r[2] && p.price < r[3]; }));
+  const off = p => p.before ? (p.before - p.price) / p.before : 0;
+  if(shop.sort === "asc") list.sort((a,b)=>a.price-b.price);
+  if(shop.sort === "desc") list.sort((a,b)=>b.price-a.price);
+  if(shop.sort === "off") list.sort((a,b)=>off(b)-off(a));
+  $("#plpN").textContent = `${list.length} producto${list.length===1?"":"s"}`;
+  $("#plpGrid").innerHTML = list.length ? list.map(cardHTML).join("") : `<div class="empty-plp">No encontramos productos con esos filtros. <a href="#tienda" id="clearF">Ver todo el catálogo</a></div>`;
+}
+
+let pdp = null;
+function viewProduct(p){
+  pdp = {p, v:0, qty:1};
+  const related = PRODUCTS.filter(x=>x.cat===p.cat && x.id!==p.id).slice(0,5);
+  return `<div class="wrap">
+    <div class="crumbs"><a href="#inicio">Inicio</a> › <a href="#tienda-${p.cat}">${CATS[p.cat].name}</a> › ${p.name}</div>
+    <div class="pdp">
+      <div class="shot"><img src="img/${p.id}.jpg" alt="${esc(p.name)}" width="800" height="800">${tagHTML(p)}</div>
+      <div class="info" id="info"></div>
+    </div>
+    <div class="specs"><h2>Ficha técnica</h2><table>${[["Marca",p.brand],...p.specs,["Categoría",CATS[p.cat].name]].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</table></div>
+    <section class="sec"><div class="sec-head"><h2>También en ${CATS[p.cat].short.toLowerCase()}</h2><a href="#tienda-${p.cat}">Ver la categoría</a></div><div class="rail">${related.map(cardHTML).join("")}</div></section>
+  </div>`;
+}
+function paintProduct(){
+  const {p} = pdp, vv = vars(p), [vn, vp] = vv[pdp.v];
+  const max = Math.max(1, p.stock);
+  pdp.qty = Math.min(pdp.qty, max);
+  $("#info").innerHTML = `
+    <div><div class="brand">${p.brand}</div><h1>${p.name}</h1><div class="sku">Código ${String(PRODUCTS.indexOf(p)+1).padStart(3,"0")}-${p.id.slice(0,3).toUpperCase()} · ${p.stock ? `${p.stock} en tienda` : "Sin stock"}</div></div>
+    ${priceHTML(p, vp, p.v ? vn : "")}
+    <p class="lead">${p.lead}</p>
+    ${p.v ? `<div><div class="opt-head">Formato</div><div class="opts">${vv.map((x,i)=>`<button class="opt" data-var="${i}" aria-pressed="${i===pdp.v}">${x[0]} · <b>${clp(x[1])}</b>${x[2]?`<small>${x[2]}</small>`:""}</button>`).join("")}</div></div>` : ""}
+    ${p.stock ? `<div class="buyrow"><div class="qty"><button data-q="-1" aria-label="Quitar uno" ${pdp.qty<=1?"disabled":""}>−</button><output id="qty">${pdp.qty}</output><button data-q="1" aria-label="Agregar uno" ${pdp.qty>=max?"disabled":""}>+</button></div><button class="btn blue" id="addBtn">Agregar al carro</button></div>`
+      : `<button class="btn line block" id="notifyBtn">Avísame cuando llegue</button>`}
+    <div class="pickbox">
+      <div class="row2">${icon("bag")}<div><b class="${p.stock?"ok":""}">${pickText(p)}</b><span>${p.stock ? "Listo en 1 hora en el mesón de retiro de Coyhaique centro. Sin costo." : "Te avisamos por WhatsApp cuando vuelva a la tienda."}</span></div></div>
+      <div class="row2">${icon("car")}<div><b>${p.cat==="construccion"?"Te lo cargamos al vehículo":"Sin fila en caja"}</b><span>${p.cat==="construccion"?"Para sacos y productos pesados, avisa al llegar y lo llevamos a tu auto.":"Si pagas en línea, solo muestras tu código de retiro."}</span></div></div>
+    </div>`;
+}
+
+/* ---------- carro y retiro ---------- */
+let cart = [];
+try { cart = JSON.parse(localStorage.getItem("ferre-cart")) || []; } catch(e) { cart = []; }
+cart = cart.filter(it => byId(it.id) && vars(byId(it.id))[it.v]);
+let stage = "cart";      // cart → retiro → listo
+let order = {slot:null, name:"", phone:"", pay:"online", code:""};
+function saveCart(){ try { localStorage.setItem("ferre-cart", JSON.stringify(cart)); } catch(e) {} }
+const unit = it => vars(byId(it.id))[it.v][1];
+const subtotal = () => cart.reduce((a,it)=>a+unit(it)*it.qty,0);
+const nItems = () => cart.reduce((a,it)=>a+it.qty,0);
+function addToCart(id, v, qty){
+  const p = byId(id); if(!p.stock) return false;
+  const ex = cart.find(it=>it.id===id && it.v===v);
+  const have = cart.filter(it=>it.id===id).reduce((a,it)=>a+it.qty,0);
+  const can = Math.min(qty, p.stock - have);
+  if(can <= 0){ toast(`Solo hay ${p.stock} en tienda`); return false; }
+  if(ex) ex.qty += can; else cart.push({id, v, qty:can});
+  saveCart(); paintCart(); return true;
+}
+function linesHTML(edit){
+  return cart.map((it,i)=>{
+    const p = byId(it.id), [vn] = vars(p)[it.v];
+    return `<div class="line"><img src="img/${p.id}.jpg" alt="">
+      <div style="min-width:0"><h4>${p.name}</h4><div class="var">${p.v?vn+" · ":""}${clp(unit(it))} c/u</div>
+      ${edit?`<div class="qty"><button data-cq="${i}:-1" aria-label="Quitar uno">−</button><output>${it.qty}</output><button data-cq="${i}:1" aria-label="Agregar uno">+</button></div><button class="rm" data-rm="${i}">Eliminar</button>`:`<div class="var">Cantidad: ${it.qty}</div>`}</div>
+      <div class="lp">${clp(unit(it)*it.qty)}</div></div>`;
+  }).join("");
+}
+function paintCart(){
+  $("#cartCount").textContent = nItems() || "";
+  const st = {cart:0, retiro:1, listo:2}[stage];
+  $("#steps").querySelectorAll("span").forEach((s,i)=>s.classList.toggle("on", i<=st));
+  $("#steps").hidden = !cart.length && stage !== "listo";
+  if(stage === "listo") return paintDone();
+  if(!cart.length){
+    stage = "cart"; $("#cartTitle").textContent = "Tu carro";
+    $("#cartBody").innerHTML = `<div class="empty"><b>Tu carro está vacío</b><span class="mute">Agrega productos y retíralos en la tienda sin hacer fila.</span><a class="btn blue" href="#tienda" data-close>Ver el catálogo</a></div>`;
+    $("#cartFoot").hidden = true; return;
+  }
+  $("#cartFoot").hidden = false;
+  const sub = subtotal();
+  const sumRows = `<div class="r"><span>Productos (${nItems()})</span><span>${clp(sub)}</span></div><div class="r"><span>Retiro en tienda</span><span class="free">Gratis</span></div><div class="r total"><span>Total</span><span>${clp(sub)}</span></div>`;
+  if(stage === "cart"){
+    $("#cartTitle").textContent = "Tu carro";
+    $("#cartBody").innerHTML = `<div class="box">${linesHTML(true)}</div>
+      <div class="box" style="display:flex;gap:12px;align-items:flex-start">${icon("pin").replace("<svg",'<svg style="width:24px;height:24px;flex:0 0 auto;color:var(--blue)"')}<div><b>Retiro en Coyhaique centro</b><div class="mute" style="font-size:14px">Listo en 1 hora. Sin costo y sin fila.</div></div></div>`;
+    $("#cartFoot").innerHTML = sumRows + `<button class="btn blue block" id="toRetiro">Elegir hora de retiro</button>`;
+  } else {
+    const ss = slots(); if(!order.slot || !ss.some(s=>s.v===order.slot)) order.slot = ss[0].v;
+    $("#cartTitle").textContent = "Retiro en tienda";
+    $("#cartBody").innerHTML = `
+      <div class="box"><h3>¿Cuándo pasas a retirar?</h3><div class="hours">${ss.map(s=>`<label><input type="radio" name="slot" value="${s.v}" ${s.v===order.slot?"checked":""}><span>${s.day}<small>${s.h}</small></span></label>`).join("")}</div></div>
+      <form class="box form" id="dataForm" novalidate><h3 style="margin:0">¿Quién retira?</h3>
+        <label>Nombre y apellido<input id="fName" autocomplete="name" required value="${esc(order.name)}"><span class="err" hidden>Escribe el nombre de quien retira</span></label>
+        <label>Teléfono (te avisamos cuando esté listo)<input id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+56 9 1234 5678" required value="${esc(order.phone)}"><span class="err" hidden>Escribe un teléfono de 9 dígitos</span></label>
+      </form>
+      <div class="box"><h3>¿Cómo pagas?</h3><div class="pays">
+        <label><input type="radio" name="pay" value="online" ${order.pay==="online"?"checked":""}><span><b>Pagar ahora en línea</b><small>Webpay o Mercado Pago. Al retirar solo muestras el código.</small></span></label>
+        <label><input type="radio" name="pay" value="tienda" ${order.pay==="tienda"?"checked":""}><span><b>Pagar al retirar</b><small>Efectivo, débito o crédito en el mesón de retiro.</small></span></label>
+      </div></div>
+      <div class="box"><h3>Tu pedido</h3>${linesHTML(false)}</div>`;
+    $("#cartFoot").innerHTML = sumRows + `<div style="display:grid;grid-template-columns:auto 1fr;gap:8px"><button class="btn line" id="backCart">Volver</button><button class="btn blue" id="confirm">${order.pay==="online"?"Pagar y apartar":"Apartar mi pedido"}</button></div>`;
+  }
+}
+function paintDone(){
+  $("#cartTitle").textContent = "Pedido apartado";
+  $("#cartFoot").hidden = false;
+  const slot = slots().find(s=>s.v===order.slot) || {day:"", h:order.slot};
+  $("#cartBody").innerHTML = `<div class="done">
+    <h3>¡Listo, ${esc(order.name.split(" ")[0])}!</h3>
+    <span class="mute">Guarda este código. Es lo único que necesitas para retirar.</span>
+    <div class="ticket"><div class="tt"><span class="etq">Código de retiro</span><div class="cod">${order.code}</div><div class="de">Muéstralo en el mesón de retiro</div></div>
+      <ul><li class="ok"><i>✓</i><span>Pedido apartado a tu nombre<small>${order.items} producto${order.items===1?"":"s"} · ${clp(order.total)} · ${order.pay==="online"?"pagado en línea":"pagas al retirar"}</small></span></li>
+      <li><i>2</i><span>Lo armamos y te avisamos<small>Mensaje al ${esc(order.phone)} cuando esté listo</small></span></li>
+      <li><i>3</i><span>Retiras sin fila</span></li></ul></div>
+    <div class="when">Retiras ${slot.day.toLowerCase()} de ${slot.h}</div>
+    <p class="note" style="margin:0">Esto es una demo. En la tienda real aquí se paga con Webpay o Mercado Pago, el pedido llega al celular de la ferretería y el cliente recibe el código por WhatsApp.</p>
+  </div>`;
+  $("#cartFoot").innerHTML = `<button class="btn blue block" id="doneBtn">Seguir comprando</button>`;
+}
+async function confirmOrder(){
+  const f = $("#dataForm"); let ok = true;
+  const name = $("#fName"), phone = $("#fPhone");
+  const checks = [[name, name.value.trim().length >= 3], [phone, phone.value.replace(/\D/g,"").replace(/^56/,"").length === 9]];
+  checks.forEach(([el, good])=>{ el.setAttribute("aria-invalid", !good); el.parentElement.querySelector(".err").hidden = good; if(!good && ok){ el.focus(); ok = false; } });
+  if(!ok) return;
+  order.name = name.value.trim(); order.phone = phone.value.trim();
+  order.items = nItems(); order.total = subtotal();
+  const pedido = {cliente:order.name, telefono:order.phone, retiro:order.slot, pago:order.pay, items:cart.map(it=>({id:it.id, variante:vars(byId(it.id))[it.v][0], cantidad:it.qty})), total:order.total};
+  let code;
+  if(CONFIG.api === "demo") code = `${CONFIG.prefijo}-${String(1000 + Math.floor(Math.random()*9000))}`;
+  else { try { code = (await (await fetch(CONFIG.api, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(pedido)})).json()).codigo; } catch(e) { toast("No se pudo enviar el pedido. Intenta de nuevo."); return; } }
+  order.code = code;
+  cart.forEach(it=>{ byId(it.id).stock -= it.qty; });
+  cart = []; saveCart(); stage = "listo"; paintCart(); $("#cartBody").scrollTop = 0;
+}
+
+/* ---------- capas ---------- */
+const animOK = !!document.body.animate;
+function slide(el, from, to){ if(animOK) el.animate([{transform:from},{transform:to}], {duration:280, easing:"cubic-bezier(.3,0,.2,1)"}); el.style.transform = to; }
+function fade(el, a, b){ if(animOK) el.animate([{opacity:a},{opacity:b}], {duration:220}); el.style.opacity = b; }
+function openCart(){
+  if(stage === "listo") stage = "cart";
+  paintCart();
+  const ov = $("#overlay"); ov.hidden = false; fade(ov, 0, 1);
+  $("#cart").classList.add("on"); slide($("#cart"), "translateX(100%)", "translateX(0)");
+  $("#cart").setAttribute("aria-hidden","false"); $("#closeCart").focus();
+}
+function closeCart(){
+  if(!$("#cart").classList.contains("on")) return;
+  slide($("#cart"), "translateX(0)", "translateX(100%)");
+  $("#cart").classList.remove("on"); $("#cart").setAttribute("aria-hidden","true");
+  const ov = $("#overlay"); fade(ov, 1, 0); setTimeout(()=>{ ov.hidden = true; }, 230);
+  if(stage === "listo") stage = "cart";
+}
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),2400); }
+
+/* ---------- carrusel ---------- */
+let carI = 0, carTimer = null;
+function goSlide(i){
+  const prev = carI; carI = (i + TILES.length) % TILES.length;
+  const tr = $("#track"); if(!tr) return;
+  const to = `translateX(-${carI*100}%)`;
+  if(prev !== carI && animOK){ tr.getAnimations().forEach(a=>a.cancel()); tr.animate([{transform:`translateX(-${prev*100}%)`},{transform:to}], {duration:700, easing:"cubic-bezier(.65,0,.35,1)"}); }
+  tr.style.transform = to;
+  document.querySelectorAll("[data-dot]").forEach(d=>d.setAttribute("aria-current", +d.dataset.dot===carI));
+  $("#dots").style.setProperty("--dot", TILES[carI].fg);
+}
+function startCar(){ stopCar(); carTimer = setInterval(()=>goSlide(carI+1), 6000); }
+function stopCar(){ clearInterval(carTimer); carTimer = null; }
+
+/* ---------- router ---------- */
+const curCat = () => { const h = location.hash.slice(1); return h.startsWith("tienda-") ? h.slice(7) : ""; };
+function route(){
+  const h = (location.hash || "#inicio").slice(1);
+  stopCar(); closeCart();
+  let active = "";
+  if(h === "" || h.startsWith("inicio")){
+    $("#app").innerHTML = viewHome(); carI = 0; goSlide(0); startCar();
+    const c = $("#carousel"); c.addEventListener("mouseenter", stopCar); c.addEventListener("mouseleave", startCar);
+    const anchor = {"inicio-faq":"faq","inicio-como":"como"}[h];
+    if(anchor){ requestAnimationFrame(()=>document.getElementById(anchor).scrollIntoView()); return paintChips(""); }
+  } else if(h.startsWith("tienda")){
+    const cat = curCat();
+    if(cat && !CATS[cat] && cat !== "ofertas"){ location.hash = "#tienda"; return; }
+    if(cat) shop.q = "";
+    $("#app").innerHTML = viewShop(cat); $("#sort").value = shop.sort; fillShop(cat); active = cat;
+  } else if(h.startsWith("p-") && byId(h.slice(2))){
+    const p = byId(h.slice(2)); $("#app").innerHTML = viewProduct(p); paintProduct(); active = p.cat;
+  } else { location.hash = "#inicio"; return; }
+  paintChips(active);
+  window.scrollTo(0,0);
+}
+function paintChips(active){
+  $("#catsBar").innerHTML = Object.entries(CATS).map(([k,c])=>`<a class="chip" href="#tienda-${k}" ${k===active?'aria-current="page"':""}><i>${icon(c.icon)}</i><span>${c.short}</span></a>`).join("");
+}
+$("#footCats").innerHTML = Object.entries(CATS).map(([k,c])=>`<a href="#tienda-${k}">${c.name}</a>`).join("");
+
+/* ---------- eventos ---------- */
+document.addEventListener("click", e=>{
+  const t = e.target.closest("button, a"); if(!t) return;
+  if(t.dataset.add){ e.preventDefault(); const p = byId(t.dataset.add); if(addToCart(p.id, 0, 1)) toast(`Agregaste: ${p.name}`); }
+  else if(t.dataset.dot){ goSlide(+t.dataset.dot); startCar(); }
+  else if(t.dataset.var){ pdp.v = +t.dataset.var; paintProduct(); }
+  else if(t.dataset.q){ pdp.qty = Math.max(1, Math.min(pdp.p.stock, pdp.qty + +t.dataset.q)); paintProduct(); }
+  else if(t.id === "addBtn"){ if(addToCart(pdp.p.id, pdp.v, pdp.qty)){ openCart(); } }
+  else if(t.id === "notifyBtn"){ toast("En la tienda real te avisamos por WhatsApp cuando llegue"); }
+  else if(t.dataset.cq){ const [i,d] = t.dataset.cq.split(":").map(Number); const it = cart[i];
+    if(d > 0 && cart.filter(x=>x.id===it.id).reduce((a,x)=>a+x.qty,0) >= byId(it.id).stock){ toast(`Solo hay ${byId(it.id).stock} en tienda`); return; }
+    it.qty += d; if(it.qty < 1) cart.splice(i,1); saveCart(); paintCart(); }
+  else if(t.dataset.rm){ cart.splice(+t.dataset.rm,1); saveCart(); paintCart(); }
+  else if(t.id === "toRetiro"){ stage = "retiro"; paintCart(); $("#cartBody").scrollTop = 0; }
+  else if(t.id === "backCart"){ stage = "cart"; paintCart(); }
+  else if(t.id === "confirm"){ confirmOrder(); }
+  else if(t.id === "doneBtn"){ stage = "cart"; closeCart(); }
+  else if(t.id === "openCart"){ openCart(); }
+  else if(t.id === "closeCart" || t.hasAttribute("data-close")){ closeCart(); }
+  else if(t.id === "filtBtn"){ $("#filters").classList.toggle("on"); }
+  else if(t.id === "clearF"){ shop = {q:"", sort:"dest", prices:new Set(), today:false}; $("#q").value = ""; }
+});
+$("#overlay").addEventListener("click", closeCart);
+document.addEventListener("keydown", e=>{ if(e.key === "Escape") closeCart(); });
+document.addEventListener("change", e=>{
+  const t = e.target;
+  if(t.id === "sort"){ shop.sort = t.value; fillShop(curCat()); }
+  if(t.id === "fToday"){ shop.today = t.checked; fillShop(curCat()); }
+  if(t.dataset.fprice){ t.checked ? shop.prices.add(t.dataset.fprice) : shop.prices.delete(t.dataset.fprice); fillShop(curCat()); }
+  if(t.name === "slot") order.slot = t.value;
+  if(t.name === "pay"){ order.pay = t.value; $("#confirm").textContent = order.pay==="online" ? "Pagar y apartar" : "Apartar mi pedido"; }
+});
+document.addEventListener("input", e=>{
+  if(e.target.id === "fName") order.name = e.target.value;
+  if(e.target.id === "fPhone") order.phone = e.target.value;
+  if(e.target.getAttribute("aria-invalid") === "true"){ e.target.setAttribute("aria-invalid","false"); const m = e.target.parentElement.querySelector(".err"); if(m) m.hidden = true; }
+});
+$("#searchForm").addEventListener("submit", e=>{
+  e.preventDefault(); shop.q = $("#q").value;
+  if(location.hash === "#tienda") fillShop(""); else location.hash = "#tienda";
+});
+window.addEventListener("hashchange", route);
+route(); paintCart();
+</script>
+
+</body>
+</html>
